@@ -1,75 +1,68 @@
 #as a semi-joke just put 2 of the same item in a box and then move onto the next. It fits and it isn't the most inefficient
+class Bin:
+        def __init__(self):
+            self.length=0
+            self.width=0
+            self.height=0
+            self.items=[]
+            self.leftSpace=[]
 
-from ortools.linear_solver import pywraplp
+        def SetDimension(self, length, width, height):
+            self.length=length
+            self.width=width
+            self.height=height
+            self.leftSpace=[self]
 
+        def PutItem(self, item):
+            for bin in self.leftSpace:
+                if (bin.IsHoldable(item)):
+                    bin.items.append(item)
+                    #calculate spaceLeft
+                    #update spaceLeft
+            pass
 
-def create_data_model():
-    """Create the data for the example."""
-    data = {}
-    weights = [48, 30, 19, 36, 36, 27, 42, 42, 36, 24, 30]
-    data['weights'] = weights
-    data['items'] = list(range(len(weights)))
-    data['bins'] = data['items']
-    data['bin_capacity'] = 100
-    return data
+        def UpdateLeftSpace(self, item):
+            pass
 
-
-def main():
-    data = create_data_model()
-
-    # Create the mip solver with the SCIP backend.
-    solver = pywraplp.Solver.CreateSolver('SCIP')
-
-    # Variables
-    # x[i, j] = 1 if item i is packed in bin j.
-    x = {}
-    for i in data['items']:
-        for j in data['bins']:
-            x[(i, j)] = solver.IntVar(0, 1, 'x_%i_%i' % (i, j))
-
-    # y[j] = 1 if bin j is used.
-    y = {}
-    for j in data['bins']:
-        y[j] = solver.IntVar(0, 1, 'y[%i]' % j)
-
-    # Constraints
-    # Each item must be in exactly one bin.
-    for i in data['items']:
-        solver.Add(sum(x[i, j] for j in data['bins']) == 1)
-
-    # The amount packed in each bin cannot exceed its capacity.
-    for j in data['bins']:
-        solver.Add(
-            sum(x[(i, j)] * data['weights'][i] for i in data['items']) <= y[j] *
-            data['bin_capacity'])
-
-    # Objective: minimize the number of bins used.
-    solver.Minimize(solver.Sum([y[j] for j in data['bins']]))
-
-    status = solver.Solve()
-
-    if status == pywraplp.Solver.OPTIMAL:
-        num_bins = 0.
-        for j in data['bins']:
-            if y[j].solution_value() == 1:
-                bin_items = []
-                bin_weight = 0
-                for i in data['items']:
-                    if x[i, j].solution_value() > 0:
-                        bin_items.append(i)
-                        bin_weight += data['weights'][i]
-                if bin_weight > 0:
-                    num_bins += 1
-                    print('Bin number', j)
-                    print('  Items packed:', bin_items)
-                    print('  Total weight:', bin_weight)
-                    print()
-        print()
-        print('Number of bins used:', num_bins)
-        print('Time = ', solver.WallTime(), ' milliseconds')
-    else:
-        print('The problem does not have an optimal solution.')
+        def IsHoldable(self, item):
+            for i in range(6):
+                item.RotateTo(i)
+                if self.length>=item.length and self.width>= item.width and self.height>=item.height:
+                    return True
+            return False
 
 
-if __name__ == '__main__':
-    main()
+    def __init__(self):
+        self.length=0
+        self.width = 0
+        self.height = 0
+        self.orientation = 0
+
+    def SetDimension(self, length, width, height):
+        self.length = length
+        self.width = width
+        self.height = height
+
+    def GetCurrOrient(self):
+        if self.length>=self.width and self.width>=self.height:
+            self.orientation=0
+        elif self.length>=self.height and self.height>=self.width:
+            self.orientation=1
+        elif self.width>=self.length and self.length>=self.height:
+            self.orientation=2
+        elif self.width>=self.height and self.height>=self.length:
+            self.orientation=3
+        elif self.height>=self.length and self.length>=self.width:
+            self.orientation=4
+        else:
+            self.orientation=5
+
+    def RotateTo(self, new_orient):
+        list=[self.length, self.width, self.height]
+        list.sort()
+        if new_orient==0:
+            self.height=list[2]
+            self.width=list[1]
+            self.length=list[0]
+        else:
+            pass

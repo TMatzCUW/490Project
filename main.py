@@ -24,7 +24,7 @@ class Bin:
             for bin in self.leftSpace:
                 if (bin.IsHoldable(item)):
                     bin.items.append(item)
-                    unhelditems.remove(item)
+                    workingitems.remove(item)
                     #calculate spaceLeft
                     self.leftSpace.remove(bin)
                     #update spaceLeft
@@ -147,8 +147,8 @@ unhelditems.append(item7)
 unhelditems.append(item8)
 unhelditems.append(item9)
 unhelditems.append(item10)
-for i in range(len(unhelditems)-1):
-    workingitems[i]=unhelditems[i]
+for i in range(len(unhelditems)):
+    workingitems.append(unhelditems[i-1])
 bins=[Bin() for i in range(len(unhelditems))]#this creates the max amount of bins needed for the amount of items, 1 bin per item
 for bin in bins:
     bin.SetDimension(12,9,6)
